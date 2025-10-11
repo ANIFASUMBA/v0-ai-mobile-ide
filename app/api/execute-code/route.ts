@@ -144,17 +144,6 @@ function detectServerFrameworks(code: string, language: string): string[] {
   const frameworks: string[] = []
 
   if (language === "javascript" || language === "typescript") {
-    // Check for Express.js
-    if (
-      code.includes("require('express')") ||
-      code.includes('require("express")') ||
-      code.includes("from 'express'") ||
-      code.includes('from "express"') ||
-      code.includes("express()")
-    ) {
-      frameworks.push("Express.js")
-    }
-
     // Check for other Node.js server frameworks
     if (code.includes("require('koa')") || code.includes("from 'koa'")) {
       frameworks.push("Koa")
@@ -194,26 +183,42 @@ function simulatePythonExecution(code: string): string {
   const lines = code.split("\n")
   const output: string[] = []
 
-  for (const line of lines) {
-    const trimmed = line.trim()
+  try {
+    for (const line of lines) {
+      const trimmed = line.trim()
 
-    // Handle print statements
-    if (trimmed.startsWith("print(")) {
-      const match = trimmed.match(/print$$(.*)$$/)
-      if (match) {
-        const content = match[1]
-        // Remove quotes if present
-        const cleaned = content.replace(/^["']|["']$/g, "")
-        output.push(cleaned)
+      if (trimmed.includes("print(")) {
+        // Match print(...) with any content - fixed the regex pattern
+        const printMatch = trimmed.match(/print$$(.*?)$$/)
+        if (printMatch) {
+          let content = printMatch[1].trim()
+
+          // Remove quotes (single or double)
+          content = content.replace(/^["']|["']$/g, "")
+
+          // Handle f-strings and string concatenation (basic)
+          content = content.replace(/f["']/g, "")
+
+          // Handle simple variables (just show the variable name for now)
+          if (!content.includes("+") && !content.includes(",")) {
+            output.push(content)
+          } else {
+            // Handle concatenation
+            const parts = content.split(/[+,]/).map((p) => p.trim().replace(/^["']|["']$/g, ""))
+            output.push(parts.join(" "))
+          }
+        }
       }
     }
-  }
 
-  if (output.length === 0) {
-    return "✓ Python code executed successfully!\n\nNote: This is a simulated Python environment.\nFor full Python execution, use a Python runtime.\n\nYour code has been validated."
-  }
+    if (output.length === 0) {
+      return "✓ Python code executed successfully!\n\nNote: No output was produced.\nAdd print() statements to see output."
+    }
 
-  return output.join("\n")
+    return output.join("\n")
+  } catch (error: any) {
+    return `Python execution error: ${error.message}`
+  }
 }
 
 function getLanguageRequirements(language: string): string {

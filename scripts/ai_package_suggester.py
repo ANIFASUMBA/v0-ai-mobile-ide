@@ -127,10 +127,10 @@ def suggest_packages(project_type: str, language: str = 'python') -> dict:
         'javascript': {
             'web': [
                 {
-                    'name': 'express',
-                    'description': 'Fast, minimalist web framework',
-                    'install': 'npm install express',
-                    'use_case': 'Building web servers and APIs'
+                    'name': 'axios',
+                    'description': 'Promise-based HTTP client for the browser',
+                    'install': 'npm install axios',
+                    'use_case': 'Making HTTP requests from the browser'
                 },
                 {
                     'name': 'react',

@@ -125,52 +125,118 @@ if __name__ == '__main__':
         },
         'javascript': {
             'web_app': '''
-// Express.js Web Application
-const express = require('express');
-const app = express();
-const port = 3000;
+// Simple Web Application
+const app = {
+  data: [],
+  
+  init() {
+    console.log('App initialized!');
+    this.setupEventListeners();
+  },
+  
+  setupEventListeners() {
+    // Add your event listeners here
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM loaded and ready!');
+    });
+  },
+  
+  async fetchData(url) {
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  },
+  
+  async postData(url, data) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error posting data:', error);
+    }
+  }
+};
 
-app.use(express.json());
-app.use(express.static('public'));
-
-app.get('/', (req, res) => {
-  res.send('Hello from your web app!');
-});
-
-app.post('/api/data', (req, res) => {
-  const data = req.body;
-  // Process your data here
-  res.json({ status: 'success', data });
-});
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+// Initialize the app
+app.init();
 ''',
             'api': '''
-// RESTful API with Express
-const express = require('express');
-const app = express();
+// API Client for making HTTP requests
+const apiClient = {
+  baseURL: 'https://api.example.com',
+  
+  async get(endpoint) {
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('GET request failed:', error);
+      throw error;
+    }
+  },
+  
+  async post(endpoint, data) {
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('POST request failed:', error);
+      throw error;
+    }
+  },
+  
+  async put(endpoint, data) {
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('PUT request failed:', error);
+      throw error;
+    }
+  },
+  
+  async delete(endpoint) {
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('DELETE request failed:', error);
+      throw error;
+    }
+  }
+};
 
-app.use(express.json());
-
-// Routes
-app.get('/api/items', (req, res) => {
-  res.json({ items: [] });
-});
-
-app.post('/api/items', (req, res) => {
-  const item = req.body;
-  res.status(201).json({ item, message: 'Created' });
-});
-
-app.get('/api/items/:id', (req, res) => {
-  const { id } = req.params;
-  res.json({ id, item: {} });
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`API running on port ${PORT}`));
+// Example usage:
+// apiClient.get('/items').then(data => console.log(data));
+// apiClient.post('/items', { name: 'New Item' }).then(data => console.log(data));
 '''
         }
     }
